@@ -109,12 +109,17 @@ module Usagewatch
         @result = file.read
       end
     end
-
-    @memstat = @result.split("\n").collect{|x| x.strip}
-    @memtotal = @memstat[0].gsub(/[^0-9]/, "")
-    @memactive = @memstat[5].gsub(/[^0-9]/, "")
+    
+    memstat_lines = @result.split("\n")
+    @memstat = {}
+    memstat_lines.each do |memstat_line|
+      field_name, value = memstat_line.split(':')
+      @memstat[field_name.strip] = value.strip
+    end
+    @memtotal = @memstat["MemTotal"].gsub(/[^0-9]/, "")
+    @memactive = @memstat["Active"].gsub(/[^0-9]/, "")
     @memactivecalc = (@memactive.to_f * 100) / @memtotal.to_f
-    @memusagepercentage = @memactivecalc.round
+    @memusagepercentage = @memactivecalc.round(2)
   end
 
   # return hash of top ten proccesses by mem consumption
